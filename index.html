@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Choose Your Next Move</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F4F7FB; --card:#FFFFFF; --ink:#1B2740; --muted:#55627A; --rule:#D3DCE7;
+  --jade:#0F7F69; --jade-soft:#DDF3EE; --violet:#5B3FD1; --violet-soft:#ECE7FF;
+  --amber:#B87500; --amber-soft:#FFF1D6; --coral:#C93A5E; --coral-soft:#FDE6EC;
+  --focus:#2F6FEB;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", Verdana, system-ui, sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1524; --card:#172138; --ink:#E9EEF7; --muted:#A6B2C7; --rule:#2B3856;
+    --jade:#45CBAA; --jade-soft:#123A35; --violet:#A893FF; --violet-soft:#2A2550;
+    --amber:#FFC24F; --amber-soft:#3A2D10; --coral:#FF84A2; --coral-soft:#43202C; --focus:#7FA8FF;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1524; --card:#172138; --ink:#E9EEF7; --muted:#A6B2C7; --rule:#2B3856;
+  --jade:#45CBAA; --jade-soft:#123A35; --violet:#A893FF; --violet-soft:#2A2550;
+  --amber:#FFC24F; --amber-soft:#3A2D10; --coral:#FF84A2; --coral-soft:#43202C; --focus:#7FA8FF;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font:1.0625rem/1.6 var(--body);-webkit-font-smoothing:antialiased}
+img,svg{max-width:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:6px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);border-bottom:1px solid var(--rule)}
+.top-row{max-width:1040px;margin:0 auto;display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem}
+.brand{font:800 1.05rem/1.1 var(--display);letter-spacing:-.01em;margin-right:auto}
+.chip{display:inline-flex;align-items:center;gap:.45rem;border:1px solid var(--rule);background:var(--card);border-radius:999px;padding:.3rem .75rem .3rem .3rem;cursor:pointer;font-size:.92rem}
+.chip.plain{padding:.35rem .8rem}
+.chip.help{border-color:var(--coral);color:var(--coral);font-weight:700}
+
+/* transit line */
+.line-wrap{max-width:1040px;margin:0 auto;padding:.4rem 1rem .9rem;overflow-x:auto}
+.line{position:relative;display:flex;justify-content:space-between;min-width:420px;padding:0 6px}
+.line::before{content:"";position:absolute;left:14px;right:14px;top:15px;height:6px;border-radius:3px;
+  background:linear-gradient(90deg,var(--amber) 0 7%,var(--jade) 7% 50%,var(--violet) 50% 93%,var(--amber) 93%)}
+.stop{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:.25rem;background:none;border:0;padding:0;cursor:pointer;width:72px}
+.stop:disabled{cursor:not-allowed}
+.dot{width:36px;height:36px;border-radius:50%;background:var(--card);border:5px solid var(--rule);display:grid;place-items:center;font:700 .85rem var(--display);color:var(--muted)}
+.stop.l1 .dot{border-color:var(--jade)} .stop.l2 .dot{border-color:var(--violet)} .stop.l0 .dot{border-color:var(--amber)}
+.stop.done .dot{background:var(--ink);color:var(--paper)}
+.stop:disabled .dot{opacity:.45}
+.stop.now .dot{transform:scale(1.18)}
+.stop-label{font-size:.72rem;line-height:1.2;color:var(--muted);text-align:center}
+.stop.now .stop-label{color:var(--ink);font-weight:700}
+@media (max-width:640px){.stop-label{display:none}.stop{width:40px}.line{min-width:300px}}
+
+/* main */
+main{max-width:720px;margin:0 auto;padding:1.5rem 1.1rem 7rem}
+.meta{display:flex;gap:.6rem;flex-wrap:wrap;font-size:.9rem;color:var(--muted);margin-bottom:.4rem}
+.tag{display:inline-block;padding:.05rem .55rem;border-radius:6px;font-weight:700;font-size:.85rem}
+.tag.l1{background:var(--jade-soft);color:var(--jade)} .tag.l2{background:var(--violet-soft);color:var(--violet)} .tag.l0{background:var(--amber-soft);color:var(--amber)}
+h1{font:800 clamp(2rem,6vw,3.1rem)/1.02 var(--display);letter-spacing:-.025em;margin:.2rem 0 1rem}
+h2{font:700 1.45rem/1.2 var(--display);letter-spacing:-.01em;margin:2.4rem 0 .6rem}
+h3{font:700 1.1rem/1.3 var(--display);margin:1.4rem 0 .4rem}
+p{margin:.6rem 0}
+.lead{font-size:1.18rem;line-height:1.55}
+.muted{color:var(--muted)}
+ul.clean{padding-left:1.2rem;margin:.5rem 0} ul.clean li{margin:.25rem 0}
+
+.def{border-left:6px solid var(--jade);background:var(--card);padding:.9rem 1.1rem;margin:1rem 0;border-radius:0 12px 12px 0}
+.l2scope .def{border-left-color:var(--violet)}
+.def b{font-family:var(--display)}
+.note{background:var(--amber-soft);border-radius:12px;padding:.8rem 1rem;margin:1rem 0;font-size:.97rem}
+.safety{border:2px solid var(--coral);background:var(--coral-soft);border-radius:16px;padding:1.1rem 1.2rem;margin:1.6rem 0}
+.safety h3{margin-top:0;color:var(--coral)}
+.source{font-size:.85rem;color:var(--muted)}
+
+.panel{background:var(--card);border:1px solid var(--rule);border-radius:16px;padding:1.1rem 1.2rem;margin:1rem 0}
+.task{font-weight:700;margin:.2rem 0 .8rem}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;border-radius:12px;border:2px solid var(--ink);background:var(--ink);color:var(--paper);padding:.6rem 1.1rem;font-weight:700;cursor:pointer;min-height:44px}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn.small{padding:.35rem .75rem;min-height:36px;font-size:.92rem;border-width:1.5px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.opt{display:block;width:100%;text-align:left;border:2px solid var(--rule);background:var(--card);border-radius:12px;padding:.65rem .9rem;margin:.4rem 0;cursor:pointer;min-height:44px}
+.opt[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.opt.right{border-color:var(--jade);background:var(--jade-soft)}
+.opt.wrong{border-color:var(--coral);background:var(--coral-soft)}
+.seg{display:flex;flex-wrap:wrap;gap:.4rem;margin:.5rem 0}
+.seg button{border:2px solid var(--rule);background:var(--card);border-radius:999px;padding:.4rem .9rem;cursor:pointer;min-height:40px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.fb{margin-top:.6rem;padding:.7rem .9rem;border-radius:10px;background:var(--paper);font-size:.97rem}
+.fb:empty{display:none}
+
+/* characters */
+.chars{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:.9rem;margin:1.2rem 0}
+.char{text-align:left;border:2px solid var(--rule);background:var(--card);border-radius:18px;padding:1rem;cursor:pointer;display:grid;grid-template-columns:auto 1fr;gap:.2rem .9rem;align-items:start}
+.char[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 2px var(--ink)}
+.char .av{grid-row:span 4}
+.char-name{font:800 1.3rem/1.1 var(--display)}
+.char small{color:var(--muted);font-size:.9rem;line-height:1.4}
+.av{display:inline-grid;place-items:center;border-radius:50%;font:800 1rem var(--display);color:#fff;flex:none}
+
+/* ecosystem map */
+.tray{display:flex;flex-wrap:wrap;gap:.5rem;min-height:3rem;padding:.6rem;border:2px dashed var(--rule);border-radius:12px}
+.item{border:2px solid var(--rule);background:var(--card);border-radius:10px;padding:.45rem .7rem;cursor:pointer;text-align:left;font-size:.95rem;line-height:1.35}
+.item[aria-pressed="true"]{border-color:var(--focus);box-shadow:0 0 0 3px color-mix(in srgb,var(--focus) 30%,transparent)}
+.zones{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:.7rem;margin-top:.8rem}
+.zone{border-radius:14px;padding:.7rem;min-height:9rem;display:flex;flex-direction:column;gap:.45rem}
+.zone.sup{background:var(--jade-soft)} .zone.cha{background:var(--amber-soft)} .zone.nee{background:var(--coral-soft)}
+.zone h4{margin:0;font:700 1rem var(--display)}
+.zone .drop{margin-top:auto}
+.item .why{display:block;font-size:.87rem;color:var(--muted);margin-top:.3rem}
+.item .verdict{display:block;font-size:.82rem;font-weight:700;margin-top:.25rem}
+
+/* matching */
+.chk{display:flex;gap:.6rem;align-items:flex-start;padding:.45rem .6rem;border-radius:10px;margin:.25rem 0;cursor:pointer}
+.chk input{width:1.2rem;height:1.2rem;margin-top:.2rem;accent-color:var(--ink);flex:none}
+.chk.good{background:var(--jade-soft)} .chk.bad{background:var(--coral-soft)}
+.chk .why{display:block;font-size:.87rem;color:var(--muted)}
+
+/* values */
+.vcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.55rem;margin:.8rem 0}
+.vcard{aspect-ratio:3/2;border:2px solid var(--rule);background:var(--card);border-radius:14px;cursor:pointer;font:700 1.05rem var(--display);display:grid;place-items:center;text-align:center;padding:.4rem}
+.vcard[aria-pressed="true"]{background:var(--violet);border-color:var(--violet);color:#fff}
+.vcard:disabled{opacity:.35;cursor:not-allowed}
+.counter{font-weight:700;color:var(--violet)}
+
+/* branching */
+.scene{background:var(--card);border-radius:18px;padding:1.2rem;border:1px solid var(--rule)}
+.vtags{display:flex;gap:.4rem;flex-wrap:wrap;margin:.5rem 0}
+.outcome{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-top:.7rem}
+@media (max-width:560px){.outcome{grid-template-columns:1fr}}
+.outcome div{border-radius:12px;padding:.7rem .9rem}
+.outcome .ben{background:var(--jade-soft)} .outcome .cha{background:var(--amber-soft)}
+.explored{font-size:.88rem;color:var(--muted)}
+
+/* forms */
+label.f{display:block;font-weight:700;margin:1rem 0 .3rem}
+textarea,input[type=text],select{width:100%;border:2px solid var(--rule);background:var(--card);border-radius:10px;padding:.55rem .7rem;min-height:44px}
+textarea{min-height:4.5rem;resize:vertical}
+.check-row{display:grid;grid-template-columns:auto 1fr;gap:.6rem;padding:.7rem 0;border-top:1px solid var(--rule)}
+.check-row:first-child{border-top:0}
+.badge{width:1.7rem;height:1.7rem;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff}
+.badge.ok{background:var(--jade)} .badge.warn{background:var(--amber)}
+
+/* card */
+.nmcard{border-radius:22px;padding:1.4rem;background:var(--ink);color:var(--paper);margin:1.2rem 0;position:relative;overflow:hidden}
+.nmcard h3{font:800 1.6rem/1.1 var(--display);margin:0 0 .9rem}
+.nmcard dl{margin:0;display:grid;gap:.6rem}
+.nmcard dt{font-size:.85rem;opacity:.75}
+.nmcard dd{margin:0;font-weight:700;border-bottom:1px dashed color-mix(in srgb,var(--paper) 40%,transparent);padding-bottom:.35rem;min-height:1.6em}
+.nmcard .ring{position:absolute;right:-60px;top:-60px;width:180px;height:180px;border-radius:50%;border:18px solid var(--violet);opacity:.55}
+
+/* footer nav */
+.foot{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:1px solid var(--rule);padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
+.foot-row{max-width:720px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:.6rem;padding:.7rem 1.1rem}
+.foot-hint{font-size:.88rem;color:var(--muted);text-align:center;flex:1}
+
+/* dialogs */
+dialog{border:0;border-radius:18px;padding:1.3rem;max-width:min(560px,92vw);background:var(--card);color:var(--ink)}
+dialog::backdrop{background:rgba(10,15,30,.55)}
+.placeholder{background:var(--paper);border:2px dashed var(--coral);border-radius:10px;padding:.6rem .8rem;margin:.4rem 0;font-size:.95rem}
+
+@media (prefers-reduced-motion:no-preference){
+  .stop.now .dot{transition:transform .25s ease}
+  .reveal{animation:rise .35s ease both}
+  @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+}
+@media print{
+  body *{visibility:hidden}
+  #printable, #printable *{visibility:visible}
+  #printable{position:absolute;left:0;top:0;width:100%;background:#fff!important;color:#000!important;border:2px solid #000}
+  #printable dd{border-bottom:1px solid #000}
+  #printable .ring{display:none}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-row">
+    <span class="brand">Choose Your Next Move</span>
+    <button class="chip" id="charChip" type="button" aria-label="Switch character"></button>
+    <button class="chip plain" id="readBtn" type="button" aria-pressed="false">Read aloud</button>
+    <button class="chip plain help" id="helpBtn" type="button">Get help</button>
+  </div>
+  <div class="line-wrap"><nav class="line" id="line" aria-label="Course progress"></nav></div>
+</header>
+
+<main id="main" tabindex="-1"></main>
+
+<footer class="foot">
+  <div class="foot-row">
+    <button class="btn ghost" id="backBtn" type="button">Back</button>
+    <span class="foot-hint" id="hint" aria-live="polite"></span>
+    <button class="btn" id="nextBtn" type="button">Continue</button>
+  </div>
+</footer>
+
+<dialog id="helpDlg" aria-labelledby="helpTitle">
+  <h2 id="helpTitle" style="margin-top:0">Get help now</h2>
+  <p>If an online experience is affecting your safety, sleep, mood, schoolwork or relationships, you do not have to handle it alone.</p>
+  <p><b>If you are in immediate danger, contact local emergency services or a trusted adult now.</b></p>
+  <div class="placeholder"><b>Emergency:</b> [country emergency number — add before release]</div>
+  <div class="placeholder"><b>Child helpline:</b> [national child helpline name and number]</div>
+  <div class="placeholder"><b>Mental health support:</b> [youth mental-health service and contact]</div>
+  <div class="placeholder"><b>Report online harm or cybercrime:</b> [national reporting channel]</div>
+  <div class="placeholder"><b>At school:</b> [school counsellor / safeguarding lead role name]</div>
+  <p class="muted">Other people you could talk to: a parent or carer, older sibling or cousin, teacher, school counsellor, community or faith leader.</p>
+  <button class="btn" type="button" onclick="this.closest('dialog').close()">Close</button>
+</dialog>
+
+<dialog id="charDlg" aria-labelledby="charTitle">
+  <h2 id="charTitle" style="margin-top:0">Switch character</h2>
+  <p class="muted">You can switch at any time. Your answers stay where they are.</p>
+  <div id="charDlgList"></div>
+  <button class="btn ghost" type="button" onclick="this.closest('dialog').close()">Cancel</button>
+</dialog>
+
+<script>
+/* ---------- content ---------- */
+const CHARS = {
+  alya:{name:"Alya",age:14,col:"#C77A00",context:"Uses a shared family phone and the school computer. Enjoys music videos and messaging friends.",challenge:"Pressure to reply quickly in a group chat; little privacy on shared devices.",supports:"Older sibling, school library, dance group."},
+  minh:{name:"Minh",age:15,col:"#0F7F69",context:"Enjoys online gaming and uses tutorials to learn graphic design.",challenge:"Balancing late-night gaming, homework and sleep.",supports:"Gaming friends, art teacher, weekend sports group."},
+  siti:{name:"Siti",age:16,col:"#C93A5E",context:"Creates short videos about crafts and follows creators for inspiration.",challenge:"Feeling pressure to check comments and compare her content.",supports:"Cousin, creative community, school media club."},
+  kai:{name:"Kai",age:17,col:"#5B3FD1",context:"Uses the internet mainly for study, family contact and planning for future study or work.",challenge:"Managing notifications, a heavy study load and too much information online.",supports:"Teacher mentor, close friend, family member."}
+};
+
+const STAGES = [
+  {t:"Meet your character",short:"Welcome",l:0,min:5},
+  {t:"Digital wellbeing: it depends",short:"Wellbeing",l:1,min:8},
+  {t:"See the whole ecosystem",short:"Ecosystem",l:1,min:12},
+  {t:"Agency means choices plus support",short:"Support",l:1,min:7},
+  {t:"What matters to you?",short:"Values",l:2,min:8},
+  {t:"Make a values-based choice",short:"Choice",l:2,min:9},
+  {t:"Your seven-day experiment",short:"Experiment",l:2,min:7},
+  {t:"Check and close",short:"Close",l:0,min:4}
+];
+
+const SCEN = [
+  {s:"Alya sends voice notes to a cousin who lives far away.",f:"This can support connection. Digital communication helps people stay in touch. It may become challenging if Alya feels pressured to always reply immediately."},
+  {s:"Minh watches a tutorial to learn a new drawing technique.",f:"This can support learning and creativity. Ask: is the tutorial helping Minh reach a goal? Does he still have time to rest and finish his responsibilities?"},
+  {s:"Siti checks comments again and again while trying to do homework.",f:"This may challenge focus. The comments may feel exciting or useful, but repeated checking can interrupt a task that matters to her."},
+  {s:"Kai stays up later than planned reading messages and news.",f:"This may affect rest. The information may be meaningful, but sleep and how he feels the next day matter too."},
+  {s:"Alya plays an online game with classmates after finishing schoolwork.",f:"Gaming can support fun and connection. It can become challenging if it creates conflict or unsafe interactions, or makes it hard to do something else that matters."}
+];
+
+const KC1 = {q:"Which statement best explains digital wellbeing?",o:[
+  ["Using technology as little as possible.","Less time is not automatically better. Some online time supports learning, creativity and connection."],
+  ["Following the same time limit as everyone else.","One rule does not fit every person. Context, purpose and effects matter."],
+  ["Noticing whether technology supports or gets in the way of important parts of your life.",""],
+  ["Never using technology for entertainment.","Fun and rest are part of a good life. What matters is how it fits with everything else."]],a:2,
+  f:"Digital wellbeing is not only about hours online. It includes purpose, content, feelings, relationships, safety, health, learning and responsibilities."};
+
+const ZONES = {sup:"Usually supports wellbeing",cha:"Can be challenging",nee:"Needs support or change from others"};
+const MAPS = {
+  alya:[
+    ["Cousin who checks in when Alya seems upset","sup","Supportive relationships help people feel heard and connected."],
+    ["Group chat that expects immediate replies","cha","The chat brings friendship and information, but pressure to reply fast can cause stress."],
+    ["Shared family device","nee","Alya may not control when the device is free or how private it is. Family agreements about sharing matter."],
+    ["Dance group","sup","An activity can support movement, belonging and enjoyment."],
+    ["Notifications during homework","cha","Alya can change some settings, but the app design also encourages frequent checking."],
+    ["School library computer","sup","A safe study space supports learning, especially when personal device access is limited."]],
+  minh:[
+    ["Art teacher who shares design resources","sup","A mentor who knows his interests can guide learning and creativity."],
+    ["Gaming friends who invite him to late-night matches","cha","These friendships matter, and the timing can clash with sleep and homework."],
+    ["Game chat open to strangers","nee","Minh can mute and report, but safe chat also depends on the game's moderation and rules."],
+    ["Weekend sports group","sup","Movement, routine and friends offline all support wellbeing."],
+    ["Phone charging next to his bed","cha","Easy access at night makes it harder to stop. Where the phone sleeps is something he could test."],
+    ["Daily game rewards that reset at midnight","nee","This is a design choice by the game company that pulls players to stay up. It is not just about self-control."]],
+  siti:[
+    ["Cousin who gives honest, kind feedback","sup","A trusted person can help Siti see her work clearly and feel supported."],
+    ["Comment notifications while she edits","cha","Feedback can be exciting, but constant alerts break her focus."],
+    ["Mean comments from accounts she doesn't know","nee","Siti can block and report, but she should not handle harassment alone. Platforms and trusted adults have a role."],
+    ["School media club","sup","A creative community offline gives skills, feedback and belonging."],
+    ["Feed that keeps showing creators with bigger audiences","cha","Recommendation systems can fuel comparison. She can curate her feed, but the design shapes what she sees."],
+    ["Online craft community she loves","sup","Interest-based spaces can inspire creativity and connection."]],
+  kai:[
+    ["Teacher mentor who helps him plan","sup","Guidance from someone experienced supports confident decisions."],
+    ["Unreliable home internet and costly data","nee","Access is not something Kai can fix with willpower. Family, school or community support can help."],
+    ["Notifications from six class group chats","cha","Each chat is useful, but together they interrupt study. Settings and agreements with classmates could help."],
+    ["Weekly family video call","sup","Staying in touch with family supports connection and belonging."],
+    ["Endless study tips and news online","cha","Information is valuable, but too much can feel overwhelming and eat into rest."],
+    ["School portal that only works well on a computer","nee","Kai may need access to a school or library computer. This is a design and access issue."]]
+};
+
+const MOVES = [
+  {c:"Minh receives insults in game chat from strangers.",o:[
+    ["Mute or block the players",1],["Use the in-game reporting tool",1],["Insult them back so they stop",0,"Arguing usually escalates things. Minh does not need to prove anything."],
+    ["Save evidence and tell a trusted adult if it continues or feels unsafe",1]],
+    f:"Reporting and support are valid options. Minh does not need to argue with strangers to prove anything."},
+  {c:"Siti wants fewer interruptions while finishing a school task.",o:[
+    ["Mute selected notifications",1],["Use a focus mode",1],["Delete all her accounts permanently",0,"That is a big change that could cut her off from her creative community. A small test is easier to try and adjust."],
+    ["Tell friends she will reply later",1]],
+    f:"This is a personal experiment Siti can try and adjust."},
+  {c:"Kai's internet is unreliable and data is expensive.",o:[
+    ["Use school or public learning resources where safe",1],["Ask a teacher about offline materials",1],["Just try harder to manage his time",0,"Access problems are not solved by self-control. Kai needs practical support."],
+    ["Talk about access needs with family or school",1]],
+    f:"This is not a problem Kai can solve through 'better self-control'. Support and access conditions matter."},
+  {c:"Someone asks Alya for private photos and she feels uncomfortable.",o:[
+    ["Do not send any images",1],["Keep it secret so no one gets upset",0,"Keeping it secret leaves Alya alone with the problem. She has done nothing wrong by telling someone."],
+    ["Stop replying, and block or report if safe",1],["Tell a trusted adult or contact a local support service",1]],
+    f:"Personal safety comes first. Alya should not be expected to handle this alone, and she is not to blame."},
+  {c:"Minh often loses sleep because he keeps playing after he planned to stop.",o:[
+    ["Notice the pattern",1],["Test a realistic wind-down plan",1],["Feel ashamed and keep it to himself",0,"Shame makes it harder to change. A repeated pattern deserves support."],
+    ["Ask someone supportive for help, and seek more support if it keeps affecting him",1]],
+    f:"A repeated pattern affecting sleep or responsibilities deserves support, not shame."}
+];
+
+const VALUES12 = ["Friendship","Privacy","Learning","Creativity","Health","Safety","Belonging","Family","Fun","Independence","Respect","Curiosity"];
+const VEX = {
+  Friendship:"Send a meaningful message or arrange a call rather than only reacting to posts.",
+  Privacy:"Review who can see a post before sharing it.",
+  Learning:"Use a focus setting for a defined study session.",
+  Creativity:"Spend time making or practising a skill before opening a feed.",
+  Health:"Try a wind-down routine that supports sleep.",
+  Safety:"Ask for help with an uncomfortable interaction rather than dealing with it alone.",
+  Belonging:"Join or contribute to a respectful interest-based community.",
+  Family:"Agree on device-sharing times with family so everyone gets a turn.",
+  Fun:"Choose a game or video you really enjoy, on purpose, rather than scrolling out of habit.",
+  Independence:"Pause before opening an app and decide what you want to do there.",
+  Respect:"Think about how a comment might land before posting it.",
+  Curiosity:"Follow one question you care about using a trusted source."
+};
+
+const BRANCH = {
+  A:{t:"Join the game now and work later.",b:"Minh connects with friends and relaxes.",c:"The assignment may be rushed, and he may sleep later than planned."},
+  B:{t:"Ignore all messages and work until the assignment is done.",b:"Minh protects his focus.",c:"He may feel isolated or stressed if he does not tell his friends or take a break."},
+  C:{t:"Message his friends, do one focused work block, then decide if there is time for a short game or tutorial.",b:"Minh protects learning, stays connected and gives himself a clear decision point.",c:"He needs a realistic time boundary, and may need to adjust if the work takes longer."}
+};
+
+const EXP8 = {
+  Friendship:"This week, I will send one meaningful check-in message to a friend or family member instead of only reacting to their posts.",
+  Privacy:"This week, I will review one privacy setting or think before sharing one personal detail.",
+  Learning:"This week, I will try one 25-minute focused study block with selected notifications muted.",
+  Creativity:"This week, I will spend 15 minutes making, practising or creating before opening my usual feed.",
+  Health:"This week, I will try one wind-down routine before sleep, such as putting non-urgent notifications on silent for 30 minutes.",
+  Belonging:"This week, I will explore one respectful community, hobby or learning space that matches an interest of mine.",
+  Safety:"This week, I will identify one trusted adult or support service I could contact if an online situation feels uncomfortable or unsafe.",
+  Independence:"This week, I will pause before opening one app and ask myself what I want to do there."
+};
+const NOTICE = ["Focus","Sleep","Mood","Relationships","Safety","Getting things done"];
+const SUPPORTS = ["A parent or carer","An older sibling or cousin","A teacher or school counsellor","A close friend","A community or faith leader","A local help service"];
+
+const QUIZ = [
+  {q:"Which item is part of a Digital Wellbeing Ecosystem?",o:["Only the apps a person uses.","Only their individual self-control.","People, routines, access, communities, digital spaces and platform conditions.","Only the number of hours they are online."],a:2,
+   f:"Your ecosystem includes everything that shapes your digital life: people, places, routines, access, communities, digital spaces and how platforms are designed."},
+  {q:"A learner shares a device with several family members and can't always get to schoolwork online. What is the most accurate way to see this?",o:["They need to manage their time better.","This is only a personal-choice issue.","Their access is part of their ecosystem and may need support from family, school or community.","They should stop using technology."],a:2,
+   f:"Access conditions are not a personal failing. They are part of the ecosystem, and others can help."},
+  {q:"Which statement best describes digital agency?",o:["Solving every online problem without help.","Making choices where possible and seeking support when needed.","Never making mistakes online.","Following the same rules as everyone else."],a:1,
+   f:"Agency includes asking for help. Knowing when and who to ask is a skill."},
+  {q:"Which experiment is the most specific and practical?",o:["\u201cI will become healthier online.\u201d","\u201cI will never use social media again.\u201d","\u201cFor three homework sessions this week, I will mute selected notifications for 25 minutes and notice whether I can focus more easily.\u201d","\u201cI will make all of my friends use their phones less.\u201d"],a:2,
+   f:"It says when, what, for how long, and what to notice. It is also within the learner's control."},
+  {q:"A learner values privacy but feels pressured to post personal information in a group chat. What is the best first question to ask themselves?",o:["\u201cWhy am I bad at handling pressure?\u201d","\u201cWhich privacy boundary matters to me, and what support or setting could help me keep it?\u201d","\u201cHow can I post more often?\u201d","\u201cWhich friend is responsible for all of this?\u201d"],a:1,
+   f:"It starts from the value, avoids blame, and points to practical help: a setting or a person."}
+];
+
+/* ---------- state (only progress + character are remembered on this device) ---------- */
+const S = {stage:0,maxSeen:0,char:null,
+  scen:{},kc1:null,map:{},mapChecked:false,picked:null,myMap:[],
+  moves:{},movesChecked:{},v5:[],v2:[],vstep:1,branch:null,explored:[],remember:"",
+  exp:{value:"",action:"",because:"",notice:[],barrier:"",adjust:"",support:""},expChecked:false,quiz:{}};
+try{const s=JSON.parse(localStorage.getItem("cynm")||"{}");if(s.char)S.char=s.char;if(Number.isInteger(s.stage)){S.stage=s.stage;S.maxSeen=s.maxSeen||s.stage}}catch(e){}
+function save(){try{localStorage.setItem("cynm",JSON.stringify({char:S.char,stage:S.stage,maxSeen:S.maxSeen}))}catch(e){}}
+
+const $=s=>document.querySelector(s);
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const C=()=>CHARS[S.char||"alya"];
+function av(key,size=34){const c=CHARS[key];return `<span class="av" style="width:${size}px;height:${size}px;background:${c.col};font-size:${size*.45}px" aria-hidden="true">${c.name[0]}</span>`}
+
+/* ---------- chrome ---------- */
+function renderLine(){
+  $("#line").innerHTML=STAGES.map((s,i)=>`<button class="stop l${s.l} ${i<S.stage?"done":""} ${i===S.stage?"now":""}" ${i>S.maxSeen?"disabled":""} data-go="${i}" aria-label="Stage ${i+1}: ${s.short}${i===S.stage?" (current)":""}" ${i===S.stage?'aria-current="step"':""}>
+    <span class="dot">${i===S.stage&&S.char?av(S.char,26):i+1}</span><span class="stop-label">${s.short}</span></button>`).join("");
+  $("#line").querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(+b.dataset.go));
+  $("#charChip").innerHTML=S.char?`${av(S.char,26)} Following ${C().name}`:"Choose a character";
+}
+function go(i){
+  if(i<0||i>=STAGES.length)return;
+  stopReading();
+  S.stage=i;S.maxSeen=Math.max(S.maxSeen,i);save();render();
+  window.scrollTo(0,0);$("#main").focus({preventScroll:true});
+}
+$("#backBtn").onclick=()=>go(S.stage-1);
+$("#nextBtn").onclick=()=>{if(S.stage===0&&!S.char){$("#hint").textContent="Choose a character to continue.";return}go(S.stage+1)};
+$("#helpBtn").onclick=()=>$("#helpDlg").showModal();
+$("#charChip").onclick=()=>{
+  $("#charDlgList").innerHTML=Object.keys(CHARS).map(k=>`<button class="opt" data-c="${k}" aria-pressed="${S.char===k}">${av(k,28)} <b>${CHARS[k].name}, ${CHARS[k].age}</b> <span class="muted">${esc(CHARS[k].challenge)}</span></button>`).join("");
+  $("#charDlgList").querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{S.char=b.dataset.c;S.picked=null;save();$("#charDlg").close();render()});
+  $("#charDlg").showModal();
+};
+let reading=false;
+function stopReading(){try{speechSynthesis.cancel()}catch(e){}reading=false;$("#readBtn").setAttribute("aria-pressed","false");$("#readBtn").textContent="Read aloud"}
+$("#readBtn").onclick=()=>{
+  if(reading){stopReading();return}
+  try{const u=new SpeechSynthesisUtterance($("#main").innerText);u.rate=.95;u.onend=stopReading;speechSynthesis.speak(u);reading=true;
+    $("#readBtn").setAttribute("aria-pressed","true");$("#readBtn").textContent="Stop reading"}catch(e){$("#hint").textContent="Read aloud isn't available in this browser."}
+};
+
+function header(){const s=STAGES[S.stage];const lab=s.l?`Lesson ${s.l}`:"Lessons 1 and 2";
+  return `<div class="meta"><span class="tag l${s.l}">${lab}</span><span>Stage ${S.stage+1} of 8</span><span>About ${s.min} minutes</span></div><h1>${s.t}</h1>`}
+
+function render(){
+  renderLine();
+  const m=$("#main");m.className=STAGES[S.stage].l===2?"l2scope":"";
+  m.innerHTML=header()+RENDER[S.stage]();
+  BIND[S.stage]&&BIND[S.stage]();
+  $("#backBtn").style.visibility=S.stage?"visible":"hidden";
+  $("#nextBtn").style.visibility=S.stage<7?"visible":"hidden";
+  $("#nextBtn").textContent=S.stage===0?"Start":"Continue";
+  $("#hint").textContent="";
+}
+
+/* ---------- stage renderers ---------- */
+const RENDER=[],BIND=[];
+
+RENDER[0]=()=>`
+<p class="lead">There is no single \u201cperfect\u201d way to use technology. Digital wellbeing is about noticing how technology fits into your life: your learning, relationships, health, safety, interests and responsibilities.</p>
+<p>In this course you will follow a fictional teen through everyday choices. At the end you can make a private plan for yourself.</p>
+<div class="note"><b>You never need to share personal experiences to finish this course.</b> Anything you type stays on this screen. It is not saved or sent anywhere.</div>
+<h2>Choose who to follow</h2>
+<p class="muted">You can switch character at any time using the button at the top.</p>
+<div class="chars" role="group" aria-label="Characters">
+${Object.keys(CHARS).map(k=>{const c=CHARS[k];return `<button class="char" data-c="${k}" aria-pressed="${S.char===k}">
+${av(k,56)}<span class="char-name">${c.name}, ${c.age}</span><small>${esc(c.context)}</small><small><b>Challenge:</b> ${esc(c.challenge)}</small><small><b>Supports:</b> ${esc(c.supports)}</small></button>`}).join("")}
+</div>`;
+BIND[0]=()=>document.querySelectorAll(".char").forEach(b=>b.onclick=()=>{S.char=b.dataset.c;save();render()});
+
+RENDER[1]=()=>`
+<div class="def"><b>Wellbeing</b> is your overall quality of life. It includes your thoughts, feelings, body, actions and relationships.</div>
+<div class="def"><b>Digital wellbeing</b> means using technology in ways that support your learning, relationships, safety, health and everyday responsibilities.</div>
+<p>There is no one rule that works for every person. What matters is:</p>
+<ul class="clean"><li>what you are doing online</li><li>why you are doing it</li><li>how it affects you during and afterwards</li><li>whether it supports or gets in the way of sleep, learning, safety, relationships, movement and responsibilities.</li></ul>
+<div class="def"><b>Digital thriving</b> means using digital opportunities for things that matter to you, like learning, creativity, connection or taking part, while recognising risks and asking for support when you need it.</div>
+<p>Technology is one part of life. Your wellbeing is also shaped by the people around you, your community, your routines, your access to devices and internet, and how the apps and sites you use are designed.</p>
+<p class="source">Research across ASEAN shows young people use digital spaces for learning, skills and taking part, and that opportunities and risks differ with access, skills, location, gender and social context (UNICEF, 2021a; 2021b).</p>
+
+<h2>Helpful, challenging, or it depends?</h2>
+<p class="task">For each situation, choose what you think. Then read the feedback.</p>
+${SCEN.map((x,i)=>`<div class="panel"><p style="margin-top:0"><b>${esc(x.s)}</b></p>
+<div class="seg" role="group" aria-label="Your view">${["Usually helpful","Can be challenging","It depends"].map((o,j)=>`<button data-s="${i}" data-o="${j}" aria-pressed="${S.scen[i]===j}">${o}</button>`).join("")}</div>
+<div class="fb" id="sf${i}" aria-live="polite">${S.scen[i]!=null?scenFb(i):""}</div></div>`).join("")}
+
+<h2>Quick check</h2>
+${mcq("kc1",KC1,S.kc1)}`;
+function scenFb(i){const j=S.scen[i];return `<b>${j===2?"Yes, it depends.":"That can be true, and it also depends."}</b> ${esc(SCEN[i].f)}`}
+function mcq(id,Q,sel){
+  return `<div class="panel"><p class="task" style="margin-top:0">${esc(Q.q)}</p>${Q.o.map((o,j)=>{const txt=Array.isArray(o)?o[0]:o;let cls="";if(sel!=null){if(j===Q.a)cls="right";else if(j===sel)cls="wrong"}
+  return `<button class="opt ${cls}" data-q="${id}" data-o="${j}" aria-pressed="${sel===j}">${String.fromCharCode(65+j)}. ${esc(txt)}</button>`}).join("")}
+  <div class="fb" aria-live="polite">${sel==null?"":(sel===Q.a?`<b>Correct.</b> `:`<b>Not quite.</b> ${Array.isArray(Q.o[sel])&&Q.o[sel][1]?esc(Q.o[sel][1])+" ":""}`)+esc(Q.f)}</div></div>`}
+BIND[1]=()=>{
+  document.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{S.scen[b.dataset.s]=+b.dataset.o;render()});
+  document.querySelectorAll('[data-q="kc1"]').forEach(b=>b.onclick=()=>{S.kc1=+b.dataset.o;render()});
+};
+
+RENDER[2]=()=>{const c=C(),items=MAPS[S.char||"alya"];
+const placed=k=>items.map((it,i)=>[it,i]).filter(([it,i])=>S.map[S.char+i]===k);
+const itemBtn=([it,i])=>{let extra="";if(S.mapChecked&&S.map[S.char+i]){const ok=S.map[S.char+i]===it[1];
+  extra=`<span class="verdict" style="color:var(${ok?"--jade":"--amber"})">${ok?"Matches our suggestion":"Our suggestion: "+ZONES[it[1]]}</span><span class="why">${esc(it[2])}</span>`}
+  return `<button class="item" data-i="${i}" aria-pressed="${S.picked===i}">${esc(it[0])}${extra}</button>`};
+const tray=items.map((it,i)=>[it,i]).filter(([it,i])=>!S.map[S.char+i]);
+return `
+<p class="lead">Your digital life is shaped by more than your choices in one moment.</p>
+<p>Your <b>Digital Wellbeing Ecosystem</b> includes:</p>
+<ul class="clean">
+<li><b>People:</b> family, friends, peers, teachers, mentors and trusted adults.</li>
+<li><b>Places and routines:</b> home, school, travel, hobbies, study time, sleep and shared spaces.</li>
+<li><b>Communities:</b> clubs, sports teams, faith groups, neighbourhoods, cultural communities and online interest groups.</li>
+<li><b>Devices and access:</b> shared or private devices, data costs, internet speed, public internet and accessibility tools.</li>
+<li><b>Digital spaces:</b> messaging apps, social platforms, games, learning platforms, music or video services.</li>
+<li><b>Platform conditions:</b> notifications, privacy settings, recommendations, reporting tools and community rules.</li>
+</ul>
+<p>Some influences are supportive. Some can be difficult. Some are mixed. None of them make you \u201cgood\u201d or \u201cbad\u201d at technology.</p>
+
+<h2>Map ${c.name}'s ecosystem</h2>
+<p class="task">Select an item, then choose the zone where you think it belongs. Select a placed item to move it again.</p>
+<p class="muted" style="font-size:.93rem">Many items could fit more than one zone. Our suggestions explain one reasonable view.</p>
+<div class="tray" aria-label="Items to place">${tray.length?tray.map(itemBtn).join(""):'<span class="muted">All items placed.</span>'}</div>
+<div class="zones">${Object.entries(ZONES).map(([k,v])=>`<div class="zone ${k.slice(0,3)}"><h4>${v}</h4>${placed(k).map(itemBtn).join("")}
+<button class="btn small ghost drop" data-z="${k}" ${S.picked==null?"disabled":""}>Place here</button></div>`).join("")}</div>
+<p style="margin-top:1rem"><button class="btn" id="checkMap" ${tray.length?"disabled":""}>Check my map</button> ${tray.length?`<span class="muted">${tray.length} left to place</span>`:""}</p>
+
+${S.mapChecked?`<div class="reveal"><h3>Think about it</h3>
+<label class="f" for="r1">Which influence seems most supportive for ${c.name}?</label><textarea id="r1"></textarea>
+<label class="f" for="r2">Which one seems hardest to manage?</label><textarea id="r2"></textarea>
+<label class="f" for="r3">What would you need to know before deciding what ${c.name} should do next?</label><textarea id="r3"></textarea>
+<div class="fb">Good decisions need context. For a group chat, it matters whether it includes close friends, school information, teasing, pressure or safety concerns, and whether there are other ways to connect and get support.</div></div>`:""}
+
+<h2>Optional: your own private map</h2>
+<p>You can map your own ecosystem, or skip this and keep going with ${c.name}. Your map stays on this screen and disappears when you leave.</p>
+<div class="panel">
+<label class="f" for="myItem" style="margin-top:0">Add a person, place, routine, activity, device or app</label>
+<input type="text" id="myItem" placeholder="For example: football practice, shared tablet, study group chat">
+<div class="seg" role="group" aria-label="How it affects you">${["Supports me","Can be challenging","I need support with this"].map((o,j)=>`<button data-my="${j}">${o}</button>`).join("")}</div>
+${S.myMap.length?`<ul class="clean">${S.myMap.map(x=>`<li><b>${esc(x[0])}</b>: ${x[1]}</li>`).join("")}</ul><button class="btn small ghost" id="clearMy">Clear my map</button>`:'<p class="muted">Type an item, then choose how it affects you to add it.</p>'}
+</div>`};
+BIND[2]=()=>{
+  document.querySelectorAll(".item").forEach(b=>b.onclick=()=>{const i=+b.dataset.i;S.picked=S.picked===i?null:i;render();const nb=document.querySelector(`.item[data-i="${i}"]`);nb&&nb.focus()});
+  document.querySelectorAll("[data-z]").forEach(b=>b.onclick=()=>{if(S.picked==null)return;S.map[S.char+S.picked]=b.dataset.z;S.picked=null;S.mapChecked=false;render();$("#hint").textContent="Placed."});
+  const cm=$("#checkMap");cm&&(cm.onclick=()=>{S.mapChecked=true;render()});
+  document.querySelectorAll("[data-my]").forEach(b=>b.onclick=()=>{const v=$("#myItem").value.trim();if(!v){$("#hint").textContent="Type an item first.";return}
+    S.myMap.push([v,["Supports me","Can be challenging","I need support with this"][+b.dataset.my]]);render();$("#myItem").focus()});
+  const cl=$("#clearMy");cl&&(cl.onclick=()=>{S.myMap=[];render()});
+};
+
+RENDER[3]=()=>`
+<div class="def"><b>Digital agency</b> means building skills to make informed choices, protect yourself where possible, and seek support when you need it.</div>
+<p>Agency does <b>not</b> mean:</p>
+<ul class="clean"><li>you must solve every digital problem alone</li><li>you are responsible for unsafe behaviour by other people</li><li>you are responsible for how a platform is designed</li><li>you must share personal experiences to prove you understand.</li></ul>
+<p>Sometimes a helpful next step is something you can try yourself. Sometimes it is asking a friend, trusted adult, teacher, school, community service or platform for support.</p>
+<p class="source">Young people in the region need digital skills and support from schools, families, communities and safer online spaces (UNICEF, 2021a; 2021b).</p>
+
+<h2>What is the next move?</h2>
+<p class="task">For each challenge, tick every move that could help. Then check your answers.</p>
+${MOVES.map((m,i)=>{const chk=S.movesChecked[i];return `<div class="panel"><p style="margin-top:0"><b>${esc(m.c)}</b></p>
+${m.o.map((o,j)=>{const on=(S.moves[i]||[]).includes(j);let cls="",why="";if(chk){cls=o[1]?"good":(on?"bad":"");if(!o[1])why=`<span class="why">${esc(o[2])}</span>`;else if(!on)why='<span class="why">This could also help.</span>'}
+return `<label class="chk ${cls}"><input type="checkbox" data-m="${i}" data-j="${j}" ${on?"checked":""}><span>${esc(o[0])}${why}</span></label>`}).join("")}
+<button class="btn small" data-chk="${i}" style="margin-top:.5rem">Check</button>
+<div class="fb" aria-live="polite">${chk?esc(m.f):""}</div></div>`}).join("")}
+
+<div class="safety" role="note"><h3>When to get support</h3>
+<p>If an online experience keeps affecting your safety, sleep, mood, schoolwork, relationships or everyday responsibilities, think about talking with a trusted adult or a local support service.</p>
+<p><b>If you are in immediate danger, contact local emergency services or a trusted adult now.</b></p>
+<button class="btn" type="button" onclick="document.getElementById('helpDlg').showModal()">See help contacts</button></div>`;
+BIND[3]=()=>{
+  document.querySelectorAll("[data-m]").forEach(cb=>cb.onchange=()=>{const i=cb.dataset.m,j=+cb.dataset.j;const a=S.moves[i]||[];S.moves[i]=cb.checked?[...a,j]:a.filter(x=>x!==j);});
+  document.querySelectorAll("[data-chk]").forEach(b=>b.onclick=()=>{S.movesChecked[b.dataset.chk]=true;render()});
+};
+
+RENDER[4]=()=>`
+<div class="def"><b>A value</b> is something that matters to you and influences how you want to live.</div>
+<p>Values can come from your experiences, family, culture, community, beliefs, interests and relationships. They don't create one correct answer. Two people can face the same choice and both decide well, because they value different things.</p>
+<ul class="clean">
+<li><b>Friendship:</b> \u201cI want to stay connected with people I care about.\u201d</li>
+<li><b>Privacy:</b> \u201cI want to choose what I share and who can see it.\u201d</li>
+<li><b>Learning:</b> \u201cI want technology to help me understand and practise.\u201d</li>
+<li><b>Health:</b> \u201cI want routines that support rest, movement and energy.\u201d</li>
+<li><b>Safety:</b> \u201cI want to protect myself and know where to get help.\u201d</li></ul>
+<p>A values compass is not a set of strict rules. It is a way of using what matters to you to choose your next step.</p>
+
+<h2>Values card sort</h2>
+<div class="panel">
+${S.vstep===1?`<p class="task" style="margin-top:0">Step 1: Choose <b>five</b> values that matter to ${C().name}, or to you if you prefer. <span class="counter">${S.v5.length} of 5</span></p>
+<div class="vcards">${VALUES12.map(v=>{const on=S.v5.includes(v);return `<button class="vcard" data-v="${v}" aria-pressed="${on}" ${!on&&S.v5.length>=5?"disabled":""}>${v}</button>`}).join("")}</div>
+<button class="btn" id="v5next" ${S.v5.length<5?"disabled":""}>Next: narrow to two</button>`
+:`<p class="task" style="margin-top:0">Step 2: Narrow it down to the <b>two</b> values that could guide the next choice. <span class="counter">${S.v2.length} of 2</span></p>
+<div class="vcards">${S.v5.map(v=>{const on=S.v2.includes(v);return `<button class="vcard" data-v2="${v}" aria-pressed="${on}" ${!on&&S.v2.length>=2?"disabled":""}>${v}</button>`}).join("")}</div>
+<button class="btn ghost small" id="vback">Change my five</button>
+${S.v2.length===2?`<div class="reveal"><h3>What these values could look like online</h3>${S.v2.map(v=>`<p><b>${v}:</b> ${esc(VEX[v])}</p>`).join("")}
+<p class="muted">Want to try this for yourself? Select \u201cChange my five\u201d and sort again privately. Nothing is saved.</p></div>`:""}`}
+</div>`;
+BIND[4]=()=>{
+  document.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{const v=b.dataset.v;S.v5=S.v5.includes(v)?S.v5.filter(x=>x!==v):[...S.v5,v].slice(0,5);render()});
+  document.querySelectorAll("[data-v2]").forEach(b=>b.onclick=()=>{const v=b.dataset.v2;S.v2=S.v2.includes(v)?S.v2.filter(x=>x!==v):[...S.v2,v].slice(0,2);render()});
+  const n=$("#v5next");n&&(n.onclick=()=>{S.vstep=2;S.v2=S.v2.filter(v=>S.v5.includes(v));render()});
+  const bk=$("#vback");bk&&(bk.onclick=()=>{S.vstep=1;render()});
+};
+
+RENDER[5]=()=>{const b=S.branch?BRANCH[S.branch]:null;return `
+<div class="scene">${av("minh",44)}
+<p><b>Minh's evening.</b> Minh has an assignment due tomorrow. He has been working for 30 minutes and is tired. His friends invite him to join a game. He also gets a notification about a new graphic-design tutorial he wants to watch.</p>
+<p>He doesn't want to ignore his friends or stay up too late, and he wants to do well on the assignment. Minh values:</p>
+<div class="vtags"><span class="tag l1">Friendship</span><span class="tag l2">Learning</span><span class="tag l0">Health</span></div></div>
+
+<h2>What should Minh do?</h2>
+${Object.entries(BRANCH).map(([k,v])=>`<button class="opt" data-b="${k}" aria-pressed="${S.branch===k}"><b>${k}.</b> ${esc(v.t)}</button>`).join("")}
+${b?`<div class="reveal" aria-live="polite"><div class="outcome"><div class="ben"><b>Possible benefit</b><br>${esc(b.b)}</div><div class="cha"><b>Possible challenge</b><br>${esc(b.c)}</div></div>
+<p class="explored">You have explored ${S.explored.length} of 3 choices. Try the others to compare the trade-offs.</p>
+${S.explored.length>=2?`<div class="panel"><p style="margin-top:0">Choice C is one values-aligned approach, but it is not the only reasonable answer. A useful next step is to make the trade-off visible:</p>
+<ul class="clean"><li>What matters most tonight?</li><li>What can wait?</li><li>What will help tomorrow?</li><li>Who could Minh talk to or ask for help?</li></ul>
+<p><b>Values guide choices. They don't remove every difficulty.</b></p></div>`:""}</div>`:""}
+
+<h2>Your turn</h2>
+<p>Choose one value that matters to you or to ${C().name}.</p>
+<div class="panel"><label class="f" for="rem" style="margin-top:0">\u201cWhen I face a choice about technology, I want to remember that \u2026 matters to me.\u201d</label>
+<select id="rem"><option value="">Choose a value</option>${VALUES12.map(v=>`<option ${S.remember===v?"selected":""}>${v}</option>`).join("")}</select>
+${S.remember?`<p class="fb"><b>\u201cWhen I face a choice about technology, I want to remember that ${S.remember.toLowerCase()} matters to me.\u201d</b></p>`:""}</div>`};
+BIND[5]=()=>{
+  document.querySelectorAll("[data-b]").forEach(x=>x.onclick=()=>{S.branch=x.dataset.b;if(!S.explored.includes(S.branch))S.explored.push(S.branch);render()});
+  $("#rem").onchange=e=>{S.remember=e.target.value;if(!S.exp.value&&EXP8[S.remember])S.exp.value=S.remember;render()};
+};
+
+function checkExp(){
+  const a=(S.exp.action||"").trim(),r=[];
+  const hasSpecific=/\d|minute|hour|before|after|when|each|every|once|twice|session|morning|night|evening|bed|school|homework|this week|one /i.test(a);
+  const vague=!a||!hasSpecific||(/\b(less|more|better|healthier)\b/i.test(a)&&!/\d/.test(a));
+  r.push(vague?["warn","Is it realistic?","Try adding a specific situation, action and time. Instead of \u201cI will use my phone less\u201d, try \u201cFor three homework sessions, I will mute selected notifications for 25 minutes.\u201d"]
+             :["ok","Is it realistic?","Your plan names a specific action you can try this week."]);
+  const risky=/(stop talking|stop speaking|cut (off|out)|delete (all|every)|never (use|talk|speak|go|play)|quit (all|every)|no one|nobody|only (online )?friend|stay up|all night|skip (meal|sleep|food|eating)|not eat|isolat)/i.test(a+" "+(S.exp.adjust||""));
+  r.push(risky?["warn","Is it safe?","This plan might cut you off from people or affect your health. A safer version could be: \u201cI will add another source of support or talk about this with someone I trust.\u201d"]
+              :["ok","Is it safe?","Nothing in your plan looks risky or isolating."]);
+  r.push(!(S.exp.support||"").trim()?["warn","Does it include support?","You can choose a person, service, school contact, community leader or another safe support option. You do not have to handle difficult experiences alone."]
+              :["ok","Does it include support?",`You named ${esc(S.exp.support)} as support.`]);
+  return r;
+}
+RENDER[6]=()=>{const e=S.exp;return `
+<p class="lead">A wellbeing experiment is not a punishment, a perfect rule or a test of willpower. It is a small, safe change you try, to learn what works in your situation.</p>
+<p>A good experiment is:</p>
+<ul class="clean"><li><b>Small:</b> possible to try this week</li><li><b>Specific:</b> clear about what you will do</li><li><b>Values-linked:</b> connected to something that matters to you</li><li><b>Flexible:</b> you can adjust it if it doesn't help</li><li><b>Supported:</b> it includes someone or somewhere you can turn to.</li></ul>
+<p class="muted">Build a plan for yourself, or for ${C().name}. Nothing is saved or sent.</p>
+
+<h2>Try, notice, adjust</h2>
+<div class="panel">
+<h3 style="margin-top:0">1. Choose one value</h3>
+<div class="seg" role="group" aria-label="Value">${Object.keys(EXP8).map(v=>`<button data-ev="${v}" aria-pressed="${e.value===v}">${v}</button>`).join("")}</div>
+<h3>2. Choose or write an action</h3>
+${e.value?`<p class="fb" style="display:block"><b>Suggestion:</b> ${esc(EXP8[e.value])}</p><button class="btn small ghost" id="useSug">Use this suggestion</button>`:'<p class="muted">Choose a value to see a suggestion.</p>'}
+<label class="f" for="eAct">For the next seven days, I will try:</label><textarea id="eAct" data-f="action">${esc(e.action)}</textarea>
+<h3>3. Complete the plan</h3>
+<label class="f" for="eBec">I am choosing this because:</label><textarea id="eBec" data-f="because">${esc(e.because)}</textarea>
+<p class="f" style="font-weight:700;margin:1rem 0 .3rem">I will notice how this affects my:</p>
+<div class="seg" role="group" aria-label="I will notice">${NOTICE.map(n=>`<button data-n="${n}" aria-pressed="${e.notice.includes(n)}">${n}</button>`).join("")}</div>
+<label class="f" for="eBar">A barrier I might face is:</label><input type="text" id="eBar" data-f="barrier" value="${esc(e.barrier)}">
+<label class="f" for="eAdj">If that happens, I will adjust by:</label><input type="text" id="eAdj" data-f="adjust" value="${esc(e.adjust)}">
+<label class="f" for="eSup">A person or support option I can use is:</label>
+<div class="seg" role="group" aria-label="Support ideas">${SUPPORTS.map(s=>`<button data-sp="${s}" aria-pressed="${e.support===s}">${s}</button>`).join("")}</div>
+<input type="text" id="eSup" data-f="support" value="${esc(e.support)}" placeholder="Or type your own">
+<p style="margin-top:1.1rem"><button class="btn" id="checkExp">Check my experiment</button></p>
+${S.expChecked?`<div class="panel reveal" aria-live="polite" style="margin-bottom:0">${checkExp().map(([k,t,m])=>`<div class="check-row"><span class="badge ${k}" aria-hidden="true">${k==="ok"?"\u2713":"!"}</span><div><b>${t}</b> <span class="sr">${k==="ok"?"Looks good.":"Needs a change."}</span><br>${m}</div></div>`).join("")}</div>`:""}
+</div>`};
+BIND[6]=()=>{
+  document.querySelectorAll("[data-ev]").forEach(b=>b.onclick=()=>{S.exp.value=b.dataset.ev;render()});
+  const us=$("#useSug");us&&(us.onclick=()=>{S.exp.action=EXP8[S.exp.value];S.expChecked=false;render()});
+  document.querySelectorAll("[data-f]").forEach(el=>el.oninput=()=>{S.exp[el.dataset.f]=el.value});
+  document.querySelectorAll("[data-n]").forEach(b=>b.onclick=()=>{const n=b.dataset.n;S.exp.notice=S.exp.notice.includes(n)?S.exp.notice.filter(x=>x!==n):[...S.exp.notice,n];render()});
+  document.querySelectorAll("[data-sp]").forEach(b=>b.onclick=()=>{S.exp.support=b.dataset.sp;render()});
+  $("#checkExp").onclick=()=>{S.expChecked=true;render();document.querySelector(".check-row")?.scrollIntoView({block:"nearest"})};
+};
+
+RENDER[7]=()=>{const done=Object.keys(S.quiz).length,score=QUIZ.filter((q,i)=>S.quiz[i]===q.a).length,e=S.exp;
+const dd=v=>v?esc(v):"&nbsp;";return `
+<h2 style="margin-top:.5rem">Applied knowledge check</h2>
+${QUIZ.map((q,i)=>mcq("z"+i,{q:`${i+1}. ${q.q}`,o:q.o,a:q.a,f:q.f},S.quiz[i])).join("")}
+${done===5?`<p class="lead reveal"><b>You have ${score} of 5 correct.</b> ${score>=4?"Strong understanding.":"Read the feedback above, then try any question again."}</p>`:`<p class="muted">${5-done} questions left.</p>`}
+
+${done===5?`<div class="reveal">
+<h2>You've completed Choose Your Next Move</h2>
+<p>You explored:</p>
+<ul class="clean"><li>what shapes digital wellbeing</li><li>how people, routines, access, communities and platforms influence your digital life</li><li>how to use your values to guide one small choice</li><li>how to create a realistic experiment and get support when needed.</li></ul>
+<p class="lead">Your choices don't have to be perfect. The goal is to notice, learn, adjust, and get support when you need it.</p>
+
+${checkExp().some(r=>r[0]==="warn")?`<div class="note">The experiment checker suggested a change to your plan. You can go back to stage 7 to update it before printing.</div>`:""}
+<div class="nmcard" id="printable"><span class="ring" aria-hidden="true"></span><h3>My Next Move Card</h3><dl>
+<dt>The value I chose</dt><dd>${dd(e.value)}</dd>
+<dt>This week, I will try</dt><dd>${dd(e.action)}</dd>
+<dt>I will notice</dt><dd>${dd(e.notice.join(", "))}</dd>
+<dt>If it is difficult, I will adjust by</dt><dd>${dd(e.adjust)}</dd>
+<dt>A person or support option I can use</dt><dd>${dd(e.support)}</dd></dl></div>
+<p><button class="btn" id="printCard">Print my card</button> <button class="btn ghost" id="copyCard">Copy as text</button></p>
+<p class="muted" style="font-size:.93rem">Empty lines? Go back to stage 7 to finish your plan, or print the card blank and fill it in by hand. You can also take a screenshot. This card is not saved anywhere.</p>
+<p><button class="btn ghost small" id="restart">Start again and clear everything</button></p></div>`:""}`};
+BIND[7]=()=>{
+  QUIZ.forEach((q,i)=>document.querySelectorAll(`[data-q="z${i}"]`).forEach(b=>b.onclick=()=>{S.quiz[i]=+b.dataset.o;render();document.querySelectorAll(".panel")[i]?.scrollIntoView({block:"nearest"})}));
+  const p=$("#printCard");p&&(p.onclick=()=>{try{window.print()}catch(e){$("#hint").textContent="Printing isn't available here. Try a screenshot or Copy as text."}});
+  const c=$("#copyCard");c&&(c.onclick=async()=>{const e=S.exp;const t=`My Next Move Card\nThe value I chose: ${e.value}\nThis week, I will try: ${e.action}\nI will notice: ${e.notice.join(", ")}\nIf it is difficult, I will adjust by: ${e.adjust}\nA person or support option I can use: ${e.support}`;
+    try{await navigator.clipboard.writeText(t);$("#hint").textContent="Card copied."}catch(err){$("#hint").textContent="Copying isn't available here. Try a screenshot."}});
+  const r=$("#restart");r&&(r.onclick=()=>{try{localStorage.removeItem("cynm")}catch(e){}location.reload()});
+};
+
+render();
+</script>
+</body>
+</html>
